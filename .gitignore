@@ -1,0 +1,22 @@
+# .gitignore (root of repo)
+# Node
+backend/node_modules/
+frontend/node_modules/
+
+# Env files
+backend/.env
+frontend/.env
+**/.env.local
+**/.env.*
+
+# builds / caches
+frontend/dist/
+backend/dist/
+npm-debug.log
+yarn-error.log
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

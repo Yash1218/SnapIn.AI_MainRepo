@@ -1,2 +1,10 @@
 node_modules/
 .env
+
+# build folders
+dist/
+build/
+
+# OS junk
+.DS_Store
+Thumbs.db

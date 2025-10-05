@@ -208,7 +208,7 @@ const AttendanceStudent = () => {
                 <select
                   value={selectedMonth}
                   onChange={(e) => setSelectedMonth(e.target.value)}
-                  className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-cyan-500/50 focus:outline-none transition-all"
+                  className="px-4 py-3 bg-gray-800 border border-white/10 rounded-xl text-white focus:border-cyan-500/50 focus:outline-none transition-all"
                 >
                   <option value="May 2025">May 2025</option>
                   <option value="April 2025">April 2025</option>

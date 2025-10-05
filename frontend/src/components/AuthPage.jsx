@@ -8,16 +8,20 @@ const AuthPage = ({ onLogin }) => {
     name: "",
     email: "",
     password: "",
-    role: "student",
+    role: "admin",
   });
 
   const handleLogin = () => {
     onLogin(formData.role);
   };
 
+  const handleSignup = () => {
+    onLogin(formData.role);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-cyan-900 flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-5xl">
+      <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">Welcome Back</h1>
           <p className="text-gray-300">
@@ -25,15 +29,9 @@ const AuthPage = ({ onLogin }) => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Login Form */}
-          <div
-            className={`bg-white/10 backdrop-blur-xl rounded-2xl p-8 border-2 transition-all duration-300 ${
-              authMode === "login"
-                ? "border-cyan-400 shadow-lg shadow-cyan-500/30"
-                : "border-white/10"
-            }`}
-          >
+        {authMode === "login" ? (
+          /* Login Form */
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border-2 border-cyan-400 shadow-lg shadow-cyan-500/30">
             <h2 className="text-2xl font-bold text-white mb-6">Login</h2>
             <div className="space-y-5">
               <div>
@@ -68,23 +66,38 @@ const AuthPage = ({ onLogin }) => {
                 <label className="block text-gray-300 mb-2 font-medium">
                   Role
                 </label>
-                <select
-                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white focus:outline-none focus:border-cyan-400 transition-all"
-                  value={formData.role}
-                  onChange={(e) =>
-                    setFormData({ ...formData, role: e.target.value })
-                  }
-                >
-                  <option value="student" className="bg-gray-800">
-                    Student
-                  </option>
-                  <option value="faculty" className="bg-gray-800">
-                    Faculty
-                  </option>
-                  <option value="admin" className="bg-gray-800">
-                    Admin
-                  </option>
-                </select>
+                <div className="relative w-full">
+                  <select
+                    className="appearance-none w-full pl-4 pr-10 py-3 bg-white/5 border border-white/20 rounded-xl text-white focus:outline-none focus:border-cyan-400 transition-all"
+                    value={formData.role}
+                    onChange={(e) =>
+                      setFormData({ ...formData, role: e.target.value })
+                    }
+                  >
+                    <option value="student" className="bg-gray-800">
+                      Student
+                    </option>
+                    <option value="faculty" className="bg-gray-800">
+                      Faculty
+                    </option>
+                    <option value="admin" className="bg-gray-800">
+                      Admin
+                    </option>
+                  </select>
+
+                  {/* Custom dropdown arrow */}
+                  <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-white">
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
               </div>
               <button
                 onClick={handleLogin}
@@ -103,15 +116,9 @@ const AuthPage = ({ onLogin }) => {
               </button>
             </p>
           </div>
-
-          {/* Signup Form */}
-          <div
-            className={`bg-white/10 backdrop-blur-xl rounded-2xl p-8 border-2 transition-all duration-300 ${
-              authMode === "signup"
-                ? "border-purple-400 shadow-lg shadow-purple-500/30"
-                : "border-white/10"
-            }`}
-          >
+        ) : (
+          /* Signup Form */
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-8 border-2 border-purple-400 shadow-lg shadow-purple-500/30">
             <h2 className="text-2xl font-bold text-white mb-6">Sign Up</h2>
             <div className="space-y-5">
               <div>
@@ -152,19 +159,43 @@ const AuthPage = ({ onLogin }) => {
                 <label className="block text-gray-300 mb-2 font-medium">
                   Role
                 </label>
-                <select className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white focus:outline-none focus:border-purple-400 transition-all">
-                  <option value="student" className="bg-gray-800">
-                    Student
-                  </option>
-                  <option value="faculty" className="bg-gray-800">
-                    Faculty
-                  </option>
-                  <option value="admin" className="bg-gray-800">
-                    Admin
-                  </option>
-                </select>
+                <div className="relative w-full">
+                  <select
+                    className="appearance-none w-full pl-4 pr-10 py-3 bg-white/5 border border-white/20 rounded-xl text-white focus:outline-none focus:border-cyan-400 transition-all"
+                    value={formData.role}
+                    onChange={(e) =>
+                      setFormData({ ...formData, role: e.target.value })
+                    }
+                  >
+                    <option value="student" className="bg-gray-800">
+                      Student
+                    </option>
+                    <option value="faculty" className="bg-gray-800">
+                      Faculty
+                    </option>
+                    <option value="admin" className="bg-gray-800">
+                      Admin
+                    </option>
+                  </select>
+
+                  {/* Custom dropdown arrow */}
+                  <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-white">
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
               </div>
-              <button className="w-full py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-purple-500/50 transform hover:scale-105 transition-all duration-300">
+              <button
+                className="w-full py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-purple-500/50 transform hover:scale-105 transition-all duration-300"
+                onClick={handleSignup}
+              >
                 Sign Up
               </button>
             </div>
@@ -178,7 +209,7 @@ const AuthPage = ({ onLogin }) => {
               </button>
             </p>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

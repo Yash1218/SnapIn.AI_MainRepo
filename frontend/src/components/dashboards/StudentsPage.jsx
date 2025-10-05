@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Users,
   Search,
@@ -10,84 +10,129 @@ import {
   Trash2,
   Mail,
   Phone,
+  Loader2,
 } from "lucide-react";
 
-const StudentsPage = () => {
+const StudentPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [showAddModal, setShowAddModal] = useState(false);
-
-  // Mock student data
-  const [students, setStudents] = useState([
-    {
-      id: 1,
-      name: "John Doe",
-      rollNo: "CS2021001",
-      department: "Computer Science",
-      year: "3rd Year",
-      email: "john.doe@example.com",
-      phone: "+91 98765 43210",
-      attendance: 92,
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      rollNo: "EE2021045",
-      department: "Electrical Engineering",
-      year: "2nd Year",
-      email: "jane.smith@example.com",
-      phone: "+91 98765 43211",
-      attendance: 88,
-    },
-    {
-      id: 3,
-      name: "Mike Johnson",
-      rollNo: "ME2020023",
-      department: "Mechanical Engineering",
-      year: "4th Year",
-      email: "mike.j@example.com",
-      phone: "+91 98765 43212",
-      attendance: 85,
-    },
-    {
-      id: 4,
-      name: "Sarah Williams",
-      rollNo: "CE2021067",
-      department: "Civil Engineering",
-      year: "3rd Year",
-      email: "sarah.w@example.com",
-      phone: "+91 98765 43213",
-      attendance: 90,
-    },
-    {
-      id: 5,
-      name: "Robert Brown",
-      rollNo: "BA2022012",
-      department: "Business Administration",
-      year: "1st Year",
-      email: "robert.b@example.com",
-      phone: "+91 98765 43214",
-      attendance: 86,
-    },
-  ]);
-
-  const departments = [
-    "all",
-    "Computer Science",
-    "Electrical Engineering",
-    "Mechanical Engineering",
-    "Civil Engineering",
-    "Business Administration",
-  ];
-
-  const filteredStudents = students.filter((student) => {
-    const matchesSearch =
-      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.rollNo.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDepartment =
-      selectedDepartment === "all" || student.department === selectedDepartment;
-    return matchesSearch && matchesDepartment;
+  const [students, setStudents] = useState([]);
+  const [departments, setDepartments] = useState(["all"]);
+  const [stats, setStats] = useState({
+    totalStudents: 0,
+    activeStudents: 0,
+    avgAttendance: 0,
+    totalDepartments: 0,
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // API base URL - adjust according to your backend
+  const API_URL = "http://localhost:5000/api"; // Remove process.env part
+
+  // Fetch students
+  const fetchStudents = async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (searchTerm) params.append("search", searchTerm);
+      if (selectedDepartment !== "all")
+        params.append("department", selectedDepartment);
+
+      const response = await fetch(`${API_URL}/students?${params}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setStudents(data.data);
+      } else {
+        setError(data.message || "Failed to fetch students");
+      }
+    } catch (err) {
+      setError("Error connecting to server");
+      console.error("Error fetching students:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch statistics
+  const fetchStats = async () => {
+    try {
+      const response = await fetch(`${API_URL}/students/stats`);
+      const data = await response.json();
+
+      if (data.success) {
+        setStats(data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching stats:", err);
+    }
+  };
+
+  // Fetch departments
+  const fetchDepartments = async () => {
+    try {
+      const response = await fetch(`${API_URL}/students/departments`);
+      const data = await response.json();
+
+      if (data.success) {
+        setDepartments(["all", ...data.data]);
+      }
+    } catch (err) {
+      console.error("Error fetching departments:", err);
+    }
+  };
+
+  // Delete student
+  const handleDelete = async (id) => {
+    if (!confirm("Are you sure you want to delete this student?")) return;
+
+    try {
+      const response = await fetch(`${API_URL}/students/${id}`, {
+        method: "DELETE",
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        fetchStudents();
+        fetchStats();
+        alert("Student deleted successfully");
+      } else {
+        alert(data.message || "Failed to delete student");
+      }
+    } catch (err) {
+      console.error("Error deleting student:", err);
+      alert("Error deleting student");
+    }
+  };
+
+  // Initial load
+  useEffect(() => {
+    fetchStudents();
+    fetchStats();
+    fetchDepartments();
+  }, []);
+
+  // Fetch when filters change
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      fetchStudents();
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm, selectedDepartment]);
+
+  if (loading && students.length === 0) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-cyan-500 animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Loading students...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8">
@@ -109,34 +154,41 @@ const StudentsPage = () => {
           </button>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-500/10 border border-red-500 rounded-xl p-4 mb-6">
+            <p className="text-red-400">{error}</p>
+          </div>
+        )}
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
             <Users className="w-8 h-8 text-cyan-400 mb-2" />
             <p className="text-gray-400 text-sm">Total Students</p>
-            <p className="text-3xl font-bold text-white">{students.length}</p>
+            <p className="text-3xl font-bold text-white">
+              {stats.totalStudents}
+            </p>
           </div>
           <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
             <Users className="w-8 h-8 text-green-400 mb-2" />
             <p className="text-gray-400 text-sm">Active Students</p>
-            <p className="text-3xl font-bold text-white">{students.length}</p>
+            <p className="text-3xl font-bold text-white">
+              {stats.activeStudents}
+            </p>
           </div>
           <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
             <Users className="w-8 h-8 text-purple-400 mb-2" />
             <p className="text-gray-400 text-sm">Avg Attendance</p>
             <p className="text-3xl font-bold text-white">
-              {Math.round(
-                students.reduce((acc, s) => acc + s.attendance, 0) /
-                  students.length
-              )}
-              %
+              {Math.round(stats.avgAttendance)}%
             </p>
           </div>
           <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
             <Users className="w-8 h-8 text-orange-400 mb-2" />
             <p className="text-gray-400 text-sm">Departments</p>
             <p className="text-3xl font-bold text-white">
-              {departments.length - 1}
+              {stats.totalDepartments}
             </p>
           </div>
         </div>
@@ -190,9 +242,6 @@ const StudentsPage = () => {
                     Year
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">
-                    Contact
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">
                     Attendance
                   </th>
                   <th className="px-6 py-4 text-right text-sm font-semibold text-gray-300">
@@ -201,67 +250,71 @@ const StudentsPage = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/10">
-                {filteredStudents.map((student) => (
-                  <tr
-                    key={student.id}
-                    className="hover:bg-white/5 transition-colors"
-                  >
-                    <td className="px-6 py-4 text-sm text-gray-300">
-                      {student.rollNo}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold">
-                          {student.name.charAt(0)}
-                        </div>
-                        <span className="text-white font-medium">
-                          {student.name}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-300">
-                      {student.department}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-300">
-                      {student.year}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2 text-sm text-gray-300">
-                          <Mail className="w-4 h-4" />
-                          {student.email}
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-300">
-                          <Phone className="w-4 h-4" />
-                          {student.phone}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 bg-gray-700 rounded-full h-2 w-20">
-                          <div
-                            className="bg-gradient-to-r from-cyan-500 to-blue-600 h-full rounded-full"
-                            style={{ width: `${student.attendance}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-cyan-400 font-bold text-sm">
-                          {student.attendance}%
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex justify-end gap-2">
-                        <button className="p-2 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-colors">
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                {students.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center">
+                      <p className="text-gray-400">No students found</p>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  students.map((student) => (
+                    <tr
+                      key={student.id}
+                      className="hover:bg-white/5 transition-colors"
+                    >
+                      <td className="px-6 py-4 text-sm text-gray-300">
+                        {student.rollNo}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                            {student.name ? student.name.charAt(0) : "S"}
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-white font-medium">
+                              {student.name}
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              {student.student_code}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-300">
+                        {student.department}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-300">
+                        {student.year}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 bg-gray-700 rounded-full h-2 w-20">
+                            <div
+                              className="bg-gradient-to-r from-cyan-500 to-blue-600 h-full rounded-full"
+                              style={{ width: `${student.attendance}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-cyan-400 font-bold text-sm">
+                            {student.attendance}%
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex justify-end gap-2">
+                          <button className="p-2 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-colors">
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(student.id)}
+                            className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -271,4 +324,4 @@ const StudentsPage = () => {
   );
 };
 
-export default StudentsPage;
+export default StudentPage;

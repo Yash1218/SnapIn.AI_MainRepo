@@ -24,6 +24,12 @@ const AdminDashboard = ({ onLogout }) => {
     avgAttendance: 0,
   });
   const [departments, setDepartments] = useState([]);
+  const [todaySummary, setTodaySummary] = useState({
+    classesTotal: 0,
+    attendanceMarked: 0,
+    absent: 0,
+  });
+  const [recentActivities, setRecentActivities] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Fetch dashboard data from backend
@@ -37,7 +43,7 @@ const AdminDashboard = ({ onLogout }) => {
         }
 
         const data = await res.json();
-        console.log("Dashboard data received:", data); // Debug log
+        console.log("Dashboard data received:", data);
 
         if (data.success) {
           setStats({
@@ -56,13 +62,34 @@ const AdminDashboard = ({ onLogout }) => {
               }))
             );
           } else {
-            // Fallback departments if none returned
             setDepartments([
               { name: "Computer Science", attendance: 0 },
               { name: "Electrical Engineering", attendance: 0 },
               { name: "Mechanical Engineering", attendance: 0 },
               { name: "Civil Engineering", attendance: 0 },
               { name: "Business Administration", attendance: 0 },
+            ]);
+          }
+
+          // Set today's summary from backend
+          if (data.todaySummary) {
+            setTodaySummary({
+              classesTotal: data.todaySummary.classesTotal || 0,
+              attendanceMarked: data.todaySummary.attendanceMarked || 0,
+              absent: data.todaySummary.absent || 0,
+            });
+          }
+
+          // Set recent activities from backend
+          if (data.recentActivities && data.recentActivities.length > 0) {
+            setRecentActivities(data.recentActivities);
+          } else {
+            setRecentActivities([
+              {
+                action: "No recent activity",
+                time: "N/A",
+                color: "bg-gray-500",
+              },
             ]);
           }
         }
@@ -83,12 +110,41 @@ const AdminDashboard = ({ onLogout }) => {
           { name: "Civil Engineering", attendance: 90 },
           { name: "Business Administration", attendance: 86 },
         ]);
+
+        setTodaySummary({
+          classesTotal: 24,
+          attendanceMarked: 18,
+          absent: 6,
+        });
+
+        setRecentActivities([
+          {
+            action: "New student added",
+            time: "2m ago",
+            color: "bg-green-500",
+          },
+          {
+            action: "Attendance marked",
+            time: "15m ago",
+            color: "bg-blue-500",
+          },
+          {
+            action: "Report generated",
+            time: "1h ago",
+            color: "bg-purple-500",
+          },
+        ]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchDashboardData();
+
+    // Refresh data every 30 seconds for live updates
+    const interval = setInterval(fetchDashboardData, 30000);
+
+    return () => clearInterval(interval);
   }, []);
 
   if (loading) {
@@ -164,7 +220,6 @@ const AdminDashboard = ({ onLogout }) => {
                     key={idx}
                     className={`relative bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all duration-300 group hover:shadow-2xl ${stat.bgGlow} hover:scale-105`}
                   >
-                    {/* Animated gradient background */}
                     <div
                       className={`absolute inset-0 bg-gradient-to-r ${stat.color} opacity-0 group-hover:opacity-10 rounded-2xl transition-opacity duration-300`}
                     ></div>
@@ -269,72 +324,68 @@ const AdminDashboard = ({ onLogout }) => {
 
                 {/* Quick Stats - Takes 1 column */}
                 <div className="space-y-6">
-                  {/* Today's Summary */}
+                  {/* Today's Summary - NOW WITH LIVE DATA */}
                   <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-2xl p-6 border border-purple-500/20">
-                    <h3 className="text-lg font-bold text-white mb-4">
-                      Today's Summary
-                    </h3>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-bold text-white">
+                        Today's Summary
+                      </h3>
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    </div>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <span className="text-gray-300 text-sm">
                           Classes Today
                         </span>
-                        <span className="text-white font-bold text-lg">24</span>
+                        <span className="text-white font-bold text-lg">
+                          {todaySummary.classesTotal}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-300 text-sm">
-                          Attendance Marked
-                        </span>
+                        <span className="text-gray-300 text-sm">Present</span>
                         <span className="text-green-400 font-bold text-lg">
-                          18
+                          {todaySummary.attendanceMarked}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-300 text-sm">Pending</span>
-                        <span className="text-orange-400 font-bold text-lg">
-                          6
+                        <span className="text-gray-300 text-sm">Absent</span>
+                        <span className="text-red-400 font-bold text-lg">
+                          {todaySummary.absent}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Recent Activity */}
+                  {/* Recent Activity - NOW WITH LIVE DATA */}
                   <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
-                    <h3 className="text-lg font-bold text-white mb-4">
-                      Recent Activity
-                    </h3>
-                    <div className="space-y-3">
-                      {[
-                        {
-                          action: "New student added",
-                          time: "2m ago",
-                          color: "bg-green-500",
-                        },
-                        {
-                          action: "Attendance marked",
-                          time: "15m ago",
-                          color: "bg-blue-500",
-                        },
-                        {
-                          action: "Report generated",
-                          time: "1h ago",
-                          color: "bg-purple-500",
-                        },
-                      ].map((activity, idx) => (
-                        <div key={idx} className="flex items-center gap-3">
-                          <div
-                            className={`w-2 h-2 ${activity.color} rounded-full animate-pulse`}
-                          ></div>
-                          <div className="flex-1">
-                            <p className="text-gray-300 text-sm">
-                              {activity.action}
-                            </p>
-                            <p className="text-gray-500 text-xs">
-                              {activity.time}
-                            </p>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-bold text-white">
+                        Recent Activity
+                      </h3>
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                    </div>
+                    <div className="space-y-3 max-h-48 overflow-y-auto">
+                      {recentActivities.length > 0 ? (
+                        recentActivities.slice(0, 5).map((activity, idx) => (
+                          <div key={idx} className="flex items-center gap-3">
+                            <div
+                              className={`w-2 h-2 ${activity.color} rounded-full animate-pulse`}
+                            ></div>
+                            <div className="flex-1">
+                              <p className="text-gray-300 text-sm">
+                                {activity.action}
+                              </p>
+                              <p className="text-gray-500 text-xs">
+                                {activity.time}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))
+                      ) : (
+                        <p className="text-gray-400 text-sm text-center py-4">
+                          No recent activity
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -386,7 +437,7 @@ const AdminDashboard = ({ onLogout }) => {
               <CheckCircle className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">AttendEase</h1>
+              <h1 className="text-xl font-bold text-white">SnapIn.AI</h1>
             </div>
           </div>
           <p className="text-sm text-gray-400 ml-13">Admin Dashboard</p>

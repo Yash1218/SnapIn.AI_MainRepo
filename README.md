@@ -95,8 +95,8 @@ The system follows a three-tier architecture:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/attendance-face-recognition.git
-cd attendance-face-recognition
+git clone [https://github.com/yourusername/attendance-face-recognition.git](https://github.com/Yash1218/SnapIn.AI_MainRepo)
+cd SnapIn.AI_MainRepo
 
 # Create virtual environment
 python -m venv venv

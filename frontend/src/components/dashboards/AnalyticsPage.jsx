@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   PieChart,
   TrendingUp,
@@ -12,6 +12,13 @@ import {
 
 const AnalyticsPage = () => {
   const [selectedPeriod, setSelectedPeriod] = useState("week");
+  const [animatedStats, setAnimatedStats] = useState({
+    averageAttendance: 0,
+    totalClasses: 0,
+    presentCount: 0,
+    absentCount: 0,
+  });
+  const [barsAnimated, setBarsAnimated] = useState(false);
 
   // Mock analytics data
   const overallStats = {
@@ -47,10 +54,10 @@ const AnalyticsPage = () => {
 
   const monthlyTrend = [
     { month: "Jan", attendance: 85 },
-    { month: "Feb", attendance: 87 },
-    { month: "Mar", attendance: 86 },
-    { month: "Apr", attendance: 88 },
-    { month: "May", attendance: 89 },
+    { month: "Feb", attendance: 7 },
+    { month: "Mar", attendance: 10 },
+    { month: "Apr", attendance: 50 },
+    { month: "May", attendance: 100 },
     { month: "Jun", attendance: 87.5 },
   ];
 
@@ -65,8 +72,50 @@ const AnalyticsPage = () => {
     { name: "Business Administration", value: 86 },
   ];
 
+  // Animate numbers on mount
+  useEffect(() => {
+    const duration = 1500;
+    const steps = 60;
+    const interval = duration / steps;
+
+    let currentStep = 0;
+    const timer = setInterval(() => {
+      currentStep++;
+      const progress = currentStep / steps;
+
+      setAnimatedStats({
+        averageAttendance: Math.min(
+          overallStats.averageAttendance * progress,
+          overallStats.averageAttendance
+        ),
+        totalClasses: Math.min(
+          Math.floor(overallStats.totalClasses * progress),
+          overallStats.totalClasses
+        ),
+        presentCount: Math.min(
+          Math.floor(overallStats.presentCount * progress),
+          overallStats.presentCount
+        ),
+        absentCount: Math.min(
+          Math.floor(overallStats.absentCount * progress),
+          overallStats.absentCount
+        ),
+      });
+
+      if (currentStep >= steps) {
+        clearInterval(timer);
+        setAnimatedStats(overallStats);
+      }
+    }, interval);
+
+    // Trigger bar animation after a short delay
+    setTimeout(() => setBarsAnimated(true), 300);
+
+    return () => clearInterval(timer);
+  }, []);
+
   return (
-    <div className="p-8">
+    <div className="p-8 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -103,7 +152,7 @@ const AnalyticsPage = () => {
               <div>
                 <p className="text-gray-400 text-sm mb-1">Overall Attendance</p>
                 <p className="text-4xl font-bold text-white">
-                  {overallStats.averageAttendance}%
+                  {animatedStats.averageAttendance.toFixed(1)}%
                 </p>
               </div>
               <div className="w-16 h-16 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center">
@@ -120,7 +169,7 @@ const AnalyticsPage = () => {
             <Calendar className="w-8 h-8 text-purple-400 mb-2" />
             <p className="text-gray-400 text-sm mb-1">Total Classes</p>
             <p className="text-3xl font-bold text-white">
-              {overallStats.totalClasses}
+              {animatedStats.totalClasses}
             </p>
           </div>
 
@@ -128,7 +177,7 @@ const AnalyticsPage = () => {
             <TrendingUp className="w-8 h-8 text-green-400 mb-2" />
             <p className="text-gray-400 text-sm mb-1">Present</p>
             <p className="text-3xl font-bold text-white">
-              {overallStats.presentCount}
+              {animatedStats.presentCount}
             </p>
           </div>
 
@@ -136,7 +185,7 @@ const AnalyticsPage = () => {
             <TrendingDown className="w-8 h-8 text-red-400 mb-2" />
             <p className="text-gray-400 text-sm mb-1">Absent</p>
             <p className="text-3xl font-bold text-white">
-              {overallStats.absentCount}
+              {animatedStats.absentCount}
             </p>
           </div>
         </div>
@@ -154,10 +203,16 @@ const AnalyticsPage = () => {
                 className="flex-1 flex flex-col items-center gap-2"
               >
                 <div
-                  className="w-full bg-gray-700 rounded-t-xl relative overflow-hidden"
-                  style={{ height: `${(data.attendance / 100) * 100}%` }}
+                  className="w-full bg-gray-700/50 rounded-t-xl relative overflow-hidden transition-all duration-1000 ease-out"
+                  style={{
+                    height: barsAnimated
+                      ? `${(data.attendance / 100) * 240}px`
+                      : "0px",
+                    transitionDelay: `${idx * 100}ms`,
+                  }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-t from-cyan-500 to-blue-600 animate-pulse"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-cyan-500 to-blue-600"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-cyan-400 to-blue-500 animate-pulse opacity-50"></div>
                 </div>
                 <div className="text-center">
                   <p className="text-white font-bold text-sm">
@@ -209,8 +264,11 @@ const AnalyticsPage = () => {
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
                   <div
-                    className="bg-gradient-to-r from-cyan-500 to-blue-600 h-full rounded-full transition-all duration-1000"
-                    style={{ width: `${dept.attendance}%` }}
+                    className="bg-gradient-to-r from-cyan-500 to-blue-600 h-full rounded-full transition-all duration-1000 ease-out"
+                    style={{
+                      width: barsAnimated ? `${dept.attendance}%` : "0%",
+                      transitionDelay: `${idx * 100}ms`,
+                    }}
                   ></div>
                 </div>
               </div>
@@ -232,7 +290,14 @@ const AnalyticsPage = () => {
               {topPerformers.map((dept, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center justify-between p-4 bg-green-500/10 rounded-xl border border-green-500/20"
+                  className="flex items-center justify-between p-4 bg-green-500/10 rounded-xl border border-green-500/20 transition-all duration-300 hover:bg-green-500/20"
+                  style={{
+                    opacity: barsAnimated ? 1 : 0,
+                    transform: barsAnimated
+                      ? "translateY(0)"
+                      : "translateY(20px)",
+                    transitionDelay: `${idx * 150}ms`,
+                  }}
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
@@ -260,7 +325,14 @@ const AnalyticsPage = () => {
               {lowPerformers.map((dept, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center justify-between p-4 bg-orange-500/10 rounded-xl border border-orange-500/20"
+                  className="flex items-center justify-between p-4 bg-orange-500/10 rounded-xl border border-orange-500/20 transition-all duration-300 hover:bg-orange-500/20"
+                  style={{
+                    opacity: barsAnimated ? 1 : 0,
+                    transform: barsAnimated
+                      ? "translateY(0)"
+                      : "translateY(20px)",
+                    transitionDelay: `${idx * 150}ms`,
+                  }}
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm">

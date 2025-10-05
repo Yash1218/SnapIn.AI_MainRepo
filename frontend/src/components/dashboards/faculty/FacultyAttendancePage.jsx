@@ -150,7 +150,7 @@ const FacultyAttendancePage = () => {
               <select
                 value={selectedCourse}
                 onChange={(e) => setSelectedCourse(e.target.value)}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500/50 transition-all"
+                className="w-full px-4 py-3 bg-gray-800 border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500/50 transition-all"
               >
                 {courses.map((course) => (
                   <option key={course.code} value={course.code}>

@@ -1,4 +1,5 @@
 import {
+  LayoutDashboard,
   Users,
   BookOpen,
   BarChart3,
@@ -12,6 +13,8 @@ import {
   PieChart,
   FileText,
   Download,
+  User,
+  QrCode,
 } from "lucide-react";
 
 export const FEATURES = [
@@ -91,19 +94,45 @@ export const ADMIN_NAV = [
 ];
 
 export const FACULTY_NAV = [
-  { label: "Dashboard", icon: BarChart3 },
-  { label: "My Courses", icon: BookOpen },
-  { label: "Mark Attendance", icon: CheckCircle },
-  { label: "Schedule", icon: Calendar },
-  { label: "Settings", icon: Settings },
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    id: "courses",
+    label: "My Courses",
+    icon: BookOpen,
+  },
+  {
+    id: "attendance",
+    label: "Mark Attendance",
+    icon: CheckCircle,
+  },
+  {
+    id: "schedule",
+    label: "Schedule",
+    icon: Calendar,
+  },
+  {
+    id: "reports",
+    label: "Reports",
+    icon: FileText,
+  },
+  {
+    id: "profile",
+    label: "Profile",
+    icon: User,
+  },
 ];
 
+// Fixed: Changed ClipboardList to CheckCircle (ClipboardList wasn't imported)
 export const STUDENT_NAV = [
-  { label: "Dashboard", icon: BarChart3 },
-  { label: "My Attendance", icon: CheckCircle },
-  { label: "Reports", icon: FileText },
-  { label: "Schedule", icon: Calendar },
-  { label: "Settings", icon: Settings },
+  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "attendance", label: "Attendance", icon: CheckCircle },
+  { id: "courses", label: "Courses", icon: BookOpen },
+  { id: "schedule", label: "Schedule", icon: Calendar },
+  { id: "profile", label: "Profile", icon: User },
 ];
 
 export const QUICK_ACTIONS = [
@@ -124,5 +153,43 @@ export const QUICK_ACTIONS = [
     label: "Schedule",
     color: "from-green-500 to-emerald-600",
     shadow: "green",
+  },
+];
+
+// NEW: Student Quick Actions (required by StudentDashboard)
+export const STUDENT_QUICK_ACTIONS = [
+  {
+    label: "Mark Attendance",
+    icon: QrCode,
+    color: "from-cyan-500 to-blue-600",
+  },
+  {
+    label: "View Reports",
+    icon: FileText,
+    color: "from-purple-500 to-indigo-600",
+  },
+  {
+    label: "Download Certificate",
+    icon: Download,
+    color: "from-green-500 to-emerald-600",
+  },
+];
+
+// BONUS: Faculty Quick Actions (for future use)
+export const FACULTY_QUICK_ACTIONS = [
+  {
+    label: "Mark Attendance",
+    icon: CheckCircle,
+    color: "from-cyan-500 to-blue-600",
+  },
+  {
+    label: "View Classes",
+    icon: BookOpen,
+    color: "from-purple-500 to-indigo-600",
+  },
+  {
+    label: "Generate Report",
+    icon: FileText,
+    color: "from-green-500 to-emerald-600",
   },
 ];

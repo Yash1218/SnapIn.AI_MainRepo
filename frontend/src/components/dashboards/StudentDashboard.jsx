@@ -378,7 +378,7 @@ const StudentDashboard = ({ onLogout }) => {
                 </div>
               </div>
 
-              {/* Quick Actions */}
+              {/* Quick Actions
               <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/10">
                 <h3 className="text-2xl font-bold text-white mb-6">
                   Quick Actions
@@ -397,7 +397,7 @@ const StudentDashboard = ({ onLogout }) => {
                     </button>
                   ))}
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         );
@@ -417,8 +417,8 @@ const StudentDashboard = ({ onLogout }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#334155] flex">
       {/* Sidebar */}
-      <div className="w-64 bg-white/5 backdrop-blur-xl border-r border-white/10 p-6 flex flex-col">
-        <div className="mb-8">
+      <div className="w-64 bg-white/5 backdrop-blur-xl border-r border-white/10 flex flex-col h-screen sticky top-0">
+        <div className="p-6 pb-4">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center">
               <CheckCircle className="w-6 h-6 text-white" />
@@ -430,7 +430,8 @@ const StudentDashboard = ({ onLogout }) => {
           <p className="text-sm text-gray-400 ml-13">Student Portal</p>
         </div>
 
-        <nav className="space-y-2 flex-1">
+        {/* Scrollable nav */}
+        <nav className="space-y-2 flex-1 overflow-y-auto px-6">
           {STUDENT_NAV.map((item) => (
             <button
               key={item.id}
@@ -447,7 +448,8 @@ const StudentDashboard = ({ onLogout }) => {
           ))}
         </nav>
 
-        <div className="pt-6 border-t border-white/10">
+        {/* Fixed logout at bottom */}
+        <div className="p-6 pt-4 border-t border-white/10 mt-auto">
           <button
             onClick={onLogout}
             className="w-full px-4 py-3 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 transition-all hover:scale-105 font-medium"
